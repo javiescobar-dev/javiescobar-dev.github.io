@@ -31,18 +31,53 @@
 		});
 
 	// Forms.
+		var $contactForm = $('#contact-form');
+		var $statusMsg = $('#form-status');
 
-		// Hack: Activate non-input submits.
-			$('form').on('click', '.submit', function(event) {
+		if ($contactForm.length > 0) {
+			$contactForm.on('submit', async function(event) {
+				// Evitar que redirija a Formspree al darle a enviar
+				event.preventDefault();
 
-				// Stop propagation, default.
-					event.stopPropagation();
-					event.preventDefault();
+				// El navegador se encarga de validar los campos vacios antes de llegar a este punto.
 
-				// Submit form.
-					$(this).parents('form').submit();
+				var data = new FormData(this);
 
+				// Mensaje visual de carga
+				$statusMsg.css('color', 'inherit').text("Enviando...");
+
+				try {
+					const response = await fetch(this.action, {
+						method: this.method,
+						body: data,
+						headers: {
+							'Accept': 'application/json'
+						}
+					});
+
+					if (response.ok) {
+						// Todo correcto: limpiamos el formulario y mostramos mensaje
+						this.reset();
+						$statusMsg.css('color', '#4caf50').text("¡Gracias! Tu mensaje ha sido enviado correctamente.");
+
+						// Borramos el mensaje de éxito pasados 5 segundos
+						setTimeout(function() { $statusMsg.text(""); }, 5000);
+					} else {
+						// En caso de recibir error por parte de Formspree
+						const errorData = await response.json();
+						if (Object.hasOwn(errorData, 'errors')) {
+							$statusMsg.text(errorData.errors.map(e => e.message).join(", "));
+						} else {
+							$statusMsg.text("Oops! Ha habido un problema al enviar el formulario.");
+						}
+						$statusMsg.css('color', '#f44336');
+					}
+				} catch (error) {
+					// Errores de red
+					$statusMsg.css('color', '#f44336').text("Ha habido un error de conexión al enviar el formulario.");
+				}
 			});
+		}
 
 	// Sidebar.
 		if ($sidebar.length > 0) {
