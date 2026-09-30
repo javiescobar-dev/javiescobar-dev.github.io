@@ -1,0 +1,12 @@
+# Documentación local: no se versiona (es interna de la máquina, no del sitio).
+/documentacion/
+
+# Guía del agente: mantenida local, no forma parte del portfolio.
+/AGENTS.md
+
+# Sistema operativo / editores
+Thumbs.db
+desktop.ini
+.DS_Store
+.vscode/
+.idea/
